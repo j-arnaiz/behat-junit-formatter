@@ -10,7 +10,7 @@ This extension requires:
 #### Install with composer:
 
 ```bash
-$ composer require --dev j-arnaiz/behat-junit-formatter
+$ composer require --dev jarnaiz/behat-junit-formatter
 ```
 
 ## Basic usage
