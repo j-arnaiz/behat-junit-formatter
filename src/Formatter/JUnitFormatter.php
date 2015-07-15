@@ -190,10 +190,17 @@ class JUnitFormatter implements Formatter
     {
         $this->testcaseTimer->stop();
         $code = $event->getTestResult()->getResultCode();
+        $testResultString = array(
+            TestResult::PASSED    => 'passed',
+            TestResult::SKIPPED   => 'skipped',
+            TestResult::PENDING   => 'pending',
+            TestResult::FAILED    => 'failed',
+        );
 
         $this->testsuiteStats[$code]++;
 
-        $this->currentTestcase->addAttribute('timer', \round($this->testcaseTimer->getTime(), 3));
+        $this->currentTestcase->addAttribute('time', \round($this->testcaseTimer->getTime(), 3));
+        $this->currentTestcase->addAttribute('status', $testResultString[$code]);
     }
 
     /**
@@ -207,9 +214,9 @@ class JUnitFormatter implements Formatter
         $testsuite = $this->currentTestsuite;
         $testsuite->addAttribute('tests', array_sum($this->testsuiteStats));
         $testsuite->addAttribute('failures', $this->testsuiteStats[TestResult::FAILED]);
-        $testsuite->addAttribute('skips', $this->testsuiteStats[TestResult::SKIPPED]);
+        $testsuite->addAttribute('skipped', $this->testsuiteStats[TestResult::SKIPPED]);
         $testsuite->addAttribute('errors', $this->testsuiteStats[TestResult::PENDING]);
-        $testsuite->addAttribute('timer', \round($this->testsuiteTimer->getTime(), 3));
+        $testsuite->addAttribute('time', \round($this->testsuiteTimer->getTime(), 3));
     }
 
     /**
