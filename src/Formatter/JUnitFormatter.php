@@ -5,6 +5,8 @@ namespace jarnaiz\JUnitFormatter\Formatter;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Behat\EventDispatcher\Event\FeatureTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
+use Behat\Behat\EventDispatcher\Event\OutlineTested;
+use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Testwork\EventDispatcher\Event\SuiteTested;
 use Behat\Testwork\Output\Formatter;
 use Behat\Testwork\Counter\Timer;
@@ -60,6 +62,11 @@ class JUnitFormatter implements Formatter
      * @var Timer
      */
     private $testcaseTimer;
+
+    /**
+     * @var String
+     */
+    private $currentOutlineTitle;
 
     /**
      * __construct
@@ -128,6 +135,9 @@ class JUnitFormatter implements Formatter
             FeatureTested::AFTER    => array('afterFeature', -50),
             ScenarioTested::BEFORE  => array('beforeScenario', -50),
             ScenarioTested::AFTER   => array('afterScenario', -50),
+            OutlineTested::BEFORE   => array('beforeOutline', -50),
+            ExampleTested::BEFORE  => array('beforeExample', -50),
+            ExampleTested::AFTER   => array('afterScenario', -50)
         );
     }
 
@@ -177,6 +187,33 @@ class JUnitFormatter implements Formatter
     {
         $this->currentTestcase = $this->currentTestsuite->addChild('testcase');
         $this->currentTestcase->addAttribute('name', $event->getScenario()->getTitle());
+
+        $this->testcaseTimer->start();
+    }
+
+    /**
+     * beforeOutline
+     *
+     * @param OutlineTested $event
+     *
+     * @return void
+     */
+    public function beforeOutline(OutlineTested $event)
+    {
+        $this->currentOutlineTitle = $event->getOutline()->getTitle();
+    }
+
+    /**
+     * beforeExample
+     *
+     * @param ScenarioTested $event
+     *
+     * @return void
+     */
+    public function beforeExample(ScenarioTested $event)
+    {
+        $this->currentTestcase = $this->currentTestsuite->addChild('testcase');
+        $this->currentTestcase->addAttribute('name', $this->currentOutlineTitle . ' Line #' . $event->getScenario()->getLine());
 
         $this->testcaseTimer->start();
     }
