@@ -8,6 +8,7 @@ use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Behat\EventDispatcher\Event\OutlineTested;
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Testwork\EventDispatcher\Event\SuiteTested;
+use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Output\Formatter;
 use Behat\Testwork\Counter\Timer;
 use jarnaiz\JUnitFormatter\Printer\FileOutputPrinter;
@@ -129,6 +130,8 @@ class JUnitFormatter implements Formatter
     public static function getSubscribedEvents()
     {
         return array(
+            ExerciseCompleted::BEFORE => array('beforeExercise', -50),
+            ExerciseCompleted::AFTER => array('afterExercise', -50),
             SuiteTested::BEFORE     => array('beforeSuite', -50),
             SuiteTested::AFTER      => array('afterSuite', -50),
             FeatureTested::BEFORE   => array('beforeFeature', -50),
@@ -142,6 +145,14 @@ class JUnitFormatter implements Formatter
     }
 
     /**
+     * @param ExerciseCompleted $event
+     */
+    public function beforeExercise(ExerciseCompleted $event)
+    {
+        $this->xml = new \SimpleXmlElement('<testsuites></testsuites>');
+    }
+
+    /**
      * beforeSuite
      *
      * @param SuiteTested $event
@@ -150,8 +161,8 @@ class JUnitFormatter implements Formatter
     {
         $suite = $event->getSuite();
 
-        $this->xml = new \SimpleXmlElement('<testsuites></testsuites>');
-        $this->xml->addAttribute('name', $suite->getName());
+        $testsuite = $this->xml->addChild('testsuite');
+        $testsuite->addAttribute('name', $suite->getName());
     }
 
     /**
@@ -262,6 +273,13 @@ class JUnitFormatter implements Formatter
      * @param SuiteTested $event
      */
     public function afterSuite(SuiteTested $event)
+    {
+    }
+
+    /**
+     * @param ExerciseCompleted $event
+     */
+    public function afterExercise(ExerciseCompleted $event)
     {
         $dom = new \DOMDocument('1.0');
         $dom->preserveWhitespace = false;
