@@ -17,6 +17,7 @@ class JUnitFormatterExtension implements ExtensionInterface
 {
     const ENV_FILENAME = 'JARNAIZ_JUNIT_FILENAME';
     const ENV_OUTPUTDIR = 'JARNAIZ_JUNIT_OUTPUTDIR';
+    const ENV_REALTIME = 'JARNAIZ_JUNIT_REALTIME';
 
     /**
      * process
@@ -55,6 +56,7 @@ class JUnitFormatterExtension implements ExtensionInterface
     {
         $builder->children()->scalarNode('filename')->defaultValue('test_report.xml');
         $builder->children()->scalarNode('outputDir')->defaultValue('build/tests');
+        $builder->children()->booleanNode('realtime')->defaultValue(false);
     }
 
     /**
@@ -65,17 +67,26 @@ class JUnitFormatterExtension implements ExtensionInterface
      */
     public function load(ContainerBuilder $container, array $config)
     {
-        $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitFormatter');
+        if (!$realtime = \getenv(self::ENV_REALTIME)) {
+            $realtime = $config['realtime'];
+        }
 
-        if (!$filename = \getenv(self::ENV_FILENAME)) {
-            $filename = $config['filename'];
+        if ($realtime) {
+            $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitRealtimeFormatter');
+        } else {
+            $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitFormatter');
+
+            if (!$filename = \getenv(self::ENV_FILENAME)) {
+                $filename = $config['filename'];
+            }
+
+            $definition->addArgument($filename);
         }
 
         if (!$outputDir = \getenv(self::ENV_OUTPUTDIR)) {
             $outputDir = $config['outputDir'];
         }
 
-        $definition->addArgument($filename);
         $definition->addArgument($outputDir);
 
         $container->setDefinition('junit.formatter', $definition)
