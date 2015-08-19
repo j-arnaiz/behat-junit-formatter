@@ -27,15 +27,17 @@ default:
         jarnaiz\JUnitFormatter\JUnitFormatterExtension:
             filename: report.xml
             outputDir: %paths.base%/build/tests
+            realtime: false
     ...
 ```
 
 ## Configuration
 
-* `filename` - filename
+* `filename` - filename (not used if realtime flag is on)
 * `outputDir` - dir to be created filename
+* `realtime` - creates a file for each feature (useful for Teamcity)
 
-you also could use JARNAIZ_JUNIT_FILENAME and JARNAIZ_JUNIT_OUTPUTDIR env variables
+you also could use JARNAIZ_JUNIT_FILENAME, JARNAIZ_JUNIT_OUTPUTDIR and JARNAIZ_JUNIT_REALTIME env variables
 
 ## Issue Submission
 
