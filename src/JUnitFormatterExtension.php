@@ -75,13 +75,13 @@ class JUnitFormatterExtension implements ExtensionInterface
             $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitRealtimeFormatter');
         } else {
             $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitFormatter');
-
-            if (!$filename = \getenv(self::ENV_FILENAME)) {
-                $filename = $config['filename'];
-            }
-
-            $definition->addArgument($filename);
         }
+
+        if (!$filename = \getenv(self::ENV_FILENAME)) {
+            $filename = $config['filename'];
+        }
+
+        $definition->addArgument($filename);
 
         if (!$outputDir = \getenv(self::ENV_OUTPUTDIR)) {
             $outputDir = $config['outputDir'];

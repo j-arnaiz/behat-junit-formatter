@@ -27,47 +27,47 @@ class JUnitFormatter implements Formatter
      *
      * @var mixed
      */
-    private $printer;
+    protected $printer;
 
     /**
      * @var array
      */
-    private $parameters = array();
+    protected $parameters = array();
 
     /**
      * @var \SimpleXmlElement
      */
-    private $xml;
+    protected $xml;
 
     /**
      * @var \SimpleXmlElement
      */
-    private $currentTestsuite;
+    protected $currentTestsuite;
 
     /**
      * @var int[]
      */
-    private $testsuiteStats;
+    protected $testsuiteStats;
 
     /**
      * @var \SimpleXmlElement
      */
-    private $currentTestcase;
+    protected $currentTestcase;
 
     /**
      * @var Timer
      */
-    private $testsuiteTimer;
+    protected $testsuiteTimer;
 
     /**
      * @var Timer
      */
-    private $testcaseTimer;
+    protected $testcaseTimer;
 
     /**
      * @var String
      */
-    private $currentOutlineTitle;
+    protected $currentOutlineTitle;
 
     /**
      * __construct
