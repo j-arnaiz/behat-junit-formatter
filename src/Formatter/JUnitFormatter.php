@@ -5,6 +5,7 @@ namespace jarnaiz\JUnitFormatter\Formatter;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Behat\EventDispatcher\Event\FeatureTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
+use Behat\Behat\EventDispatcher\Event\StepTested;
 use Behat\Behat\EventDispatcher\Event\OutlineTested;
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Testwork\EventDispatcher\Event\SuiteTested;
@@ -138,6 +139,7 @@ class JUnitFormatter implements Formatter
             FeatureTested::AFTER    => array('afterFeature', -50),
             ScenarioTested::BEFORE  => array('beforeScenario', -50),
             ScenarioTested::AFTER   => array('afterScenario', -50),
+            StepTested::AFTER       => array('afterStep', -50),
             OutlineTested::BEFORE   => array('beforeOutline', -50),
             ExampleTested::BEFORE  => array('beforeExample', -50),
             ExampleTested::AFTER   => array('afterScenario', -50)
@@ -227,6 +229,28 @@ class JUnitFormatter implements Formatter
         $this->currentTestcase->addAttribute('name', $this->currentOutlineTitle . ' Line #' . $event->getScenario()->getLine());
 
         $this->testcaseTimer->start();
+    }
+
+    /**
+     * afterStep
+     *
+     * @param mixed $event
+     */
+    public function afterStep($event)
+    {
+        $code = $event->getTestResult()->getResultCode();
+        $testResultString = array(
+            TestResult::PASSED    => 'passed',
+            TestResult::SKIPPED   => 'skipped',
+            TestResult::PENDING   => 'pending',
+            TestResult::FAILED    => 'failed',
+        );
+        if(TestResult::FAILED === $code) {
+            if ($event->getTestResult()->hasException()) {
+                $failureNode = $this->currentTestcase->addChild('failure', $event->getStep()->getKeyword() . " " . $event->getStep()->getText() . ":\n\n" . $event->getTestResult()->getException()->getMessage());
+                $failureNode->addAttribute('type', \get_class($event->getTestResult()->getException()));
+            }
+        }
     }
 
     /**
