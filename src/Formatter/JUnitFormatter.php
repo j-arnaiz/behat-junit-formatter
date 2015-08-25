@@ -165,6 +165,7 @@ class JUnitFormatter implements Formatter
 
         $testsuite = $this->xml->addChild('testsuite');
         $testsuite->addAttribute('name', $suite->getName());
+        $testsuite->addAttribute('tests', 0);
     }
 
     /**
@@ -284,7 +285,7 @@ class JUnitFormatter implements Formatter
     {
         $this->testsuiteTimer->stop();
         $testsuite = $this->currentTestsuite;
-        $testsuite->addAttribute('tests', array_sum($this->testsuiteStats));
+        $testsuite['tests'] = array_sum($this->testsuiteStats);
         $testsuite->addAttribute('failures', $this->testsuiteStats[TestResult::FAILED]);
         $testsuite->addAttribute('skipped', $this->testsuiteStats[TestResult::SKIPPED]);
         $testsuite->addAttribute('errors', $this->testsuiteStats[TestResult::PENDING]);
