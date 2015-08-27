@@ -240,12 +240,6 @@ class JUnitFormatter implements Formatter
     public function afterStep($event)
     {
         $code = $event->getTestResult()->getResultCode();
-        $testResultString = array(
-            TestResult::PASSED    => 'passed',
-            TestResult::SKIPPED   => 'skipped',
-            TestResult::PENDING   => 'pending',
-            TestResult::FAILED    => 'failed',
-        );
         if(TestResult::FAILED === $code) {
             if ($event->getTestResult()->hasException()) {
                 $failureNode = $this->currentTestcase->addChild('failure', $event->getStep()->getKeyword() . " " . $event->getStep()->getText() . ":\n\n" . $event->getTestResult()->getException()->getMessage());
