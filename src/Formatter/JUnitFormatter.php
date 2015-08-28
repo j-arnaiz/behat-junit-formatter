@@ -2,13 +2,11 @@
 
 namespace jarnaiz\JUnitFormatter\Formatter;
 
+use Behat\Testwork\Output\Printer\OutputPrinter;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Behat\EventDispatcher\Event\FeatureTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
-use Behat\Behat\EventDispatcher\Event\OutlineTested;
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
-use Behat\Testwork\EventDispatcher\Event\SuiteTested;
-use Behat\Testwork\EventDispatcher\Event\ExerciseCompleted;
 use Behat\Testwork\Output\Formatter;
 use Behat\Testwork\Counter\Timer;
 use jarnaiz\JUnitFormatter\Printer\FileOutputPrinter;
@@ -70,6 +68,11 @@ class JUnitFormatter implements Formatter
     protected $currentOutlineTitle;
 
     /**
+     * @var String
+     */
+    protected $outputDir;
+
+    /**
      * __construct
      *
      * @param mixed $filename
@@ -80,6 +83,7 @@ class JUnitFormatter implements Formatter
         $this->printer        = new FileOutputPrinter($filename, $outputDir);
         $this->testsuiteTimer = new Timer();
         $this->testcaseTimer  = new Timer();
+        $this->outputDir      = $outputDir;
     }
 
     /**
@@ -95,7 +99,7 @@ class JUnitFormatter implements Formatter
      */
     public function getDescription()
     {
-        return 'Creates a junit xml file';
+        return 'Creates a junit xml files for each feature';
     }
 
     /**
@@ -115,8 +119,6 @@ class JUnitFormatter implements Formatter
     }
 
     /**
-     * getOutputPrinter
-     *
      * @return OutputPrinter
      */
     public function getOutputPrinter()
@@ -130,49 +132,32 @@ class JUnitFormatter implements Formatter
     public static function getSubscribedEvents()
     {
         return array(
-            ExerciseCompleted::BEFORE => array('beforeExercise', -50),
-            ExerciseCompleted::AFTER => array('afterExercise', -50),
-            SuiteTested::BEFORE     => array('beforeSuite', -50),
-            SuiteTested::AFTER      => array('afterSuite', -50),
             FeatureTested::BEFORE   => array('beforeFeature', -50),
             FeatureTested::AFTER    => array('afterFeature', -50),
             ScenarioTested::BEFORE  => array('beforeScenario', -50),
             ScenarioTested::AFTER   => array('afterScenario', -50),
-            OutlineTested::BEFORE   => array('beforeOutline', -50),
-            ExampleTested::BEFORE  => array('beforeExample', -50),
             ExampleTested::AFTER   => array('afterScenario', -50)
         );
     }
 
     /**
-     * @param ExerciseCompleted $event
-     */
-    public function beforeExercise(ExerciseCompleted $event)
-    {
-        $this->xml = new \SimpleXmlElement('<testsuites></testsuites>');
-    }
-
-    /**
-     * beforeSuite
-     *
-     * @param SuiteTested $event
-     */
-    public function beforeSuite(SuiteTested $event)
-    {
-        $suite = $event->getSuite();
-
-        $testsuite = $this->xml->addChild('testsuite');
-        $testsuite->addAttribute('name', $suite->getName());
-    }
-
-    /**
-     * beforeFeature
-     *
      * @param FeatureTested $event
      */
     public function beforeFeature(FeatureTested $event)
     {
+        $suite = $event->getSuite();
         $feature = $event->getFeature();
+
+        $suiteId = $suite->getName();
+        $featurePathinfo = pathinfo($feature->getFile());
+        $featureId = $featurePathinfo['filename'];
+        $outputFile = sprintf('%s_%s.xml', $suiteId, $featureId);
+
+        $this->printer = new FileOutputPrinter($outputFile, $this->outputDir);
+        $this->xml = new \SimpleXmlElement('<testsuites></testsuites>');
+
+        $testsuite = $this->xml->addChild('testsuite');
+        $testsuite->addAttribute('name', $event->getSuite()->getName());
 
         $this->currentTestsuite = $testsuite = $this->xml->addChild('testsuite');
         $testsuite->addAttribute('name', $feature->getTitle());
@@ -188,6 +173,27 @@ class JUnitFormatter implements Formatter
     }
 
     /**
+     * @return void
+     */
+    public function afterFeature()
+    {
+        $this->testsuiteTimer->stop();
+        $testsuite = $this->currentTestsuite;
+        $testsuite->addAttribute('tests', array_sum($this->testsuiteStats));
+        $testsuite->addAttribute('failures', $this->testsuiteStats[TestResult::FAILED]);
+        $testsuite->addAttribute('skipped', $this->testsuiteStats[TestResult::SKIPPED]);
+        $testsuite->addAttribute('errors', $this->testsuiteStats[TestResult::PENDING]);
+        $testsuite->addAttribute('time', \round($this->testsuiteTimer->getTime(), 3));
+
+        $dom = new \DOMDocument('1.0');
+        $dom->preserveWhitespace = false;
+        $dom->formatOutput = true;
+        $dom->loadXml($this->xml->asXml());
+
+        $this->printer->write($dom->saveXML());
+    }
+
+    /**
      * beforeScenario
      *
      * @param ScenarioTested $event
@@ -200,18 +206,6 @@ class JUnitFormatter implements Formatter
         $this->currentTestcase->addAttribute('name', $event->getScenario()->getTitle());
 
         $this->testcaseTimer->start();
-    }
-
-    /**
-     * beforeOutline
-     *
-     * @param OutlineTested $event
-     *
-     * @return void
-     */
-    public function beforeOutline(OutlineTested $event)
-    {
-        $this->currentOutlineTitle = $event->getOutline()->getTitle();
     }
 
     /**
@@ -249,43 +243,5 @@ class JUnitFormatter implements Formatter
 
         $this->currentTestcase->addAttribute('time', \round($this->testcaseTimer->getTime(), 3));
         $this->currentTestcase->addAttribute('status', $testResultString[$code]);
-    }
-
-    /**
-     * afterFeature
-     *
-     * @param FeatureTested $event
-     */
-    public function afterFeature(FeatureTested $event)
-    {
-        $this->testsuiteTimer->stop();
-        $testsuite = $this->currentTestsuite;
-        $testsuite->addAttribute('tests', array_sum($this->testsuiteStats));
-        $testsuite->addAttribute('failures', $this->testsuiteStats[TestResult::FAILED]);
-        $testsuite->addAttribute('skipped', $this->testsuiteStats[TestResult::SKIPPED]);
-        $testsuite->addAttribute('errors', $this->testsuiteStats[TestResult::PENDING]);
-        $testsuite->addAttribute('time', \round($this->testsuiteTimer->getTime(), 3));
-    }
-
-    /**
-     * afterSuite
-     *
-     * @param SuiteTested $event
-     */
-    public function afterSuite(SuiteTested $event)
-    {
-    }
-
-    /**
-     * @param ExerciseCompleted $event
-     */
-    public function afterExercise(ExerciseCompleted $event)
-    {
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhitespace = false;
-        $dom->formatOutput = true;
-        $dom->loadXml($this->xml->asXml());
-
-        $this->printer->write($dom->saveXML());
     }
 }

@@ -15,9 +15,8 @@ use Symfony\Component\DependencyInjection\Definition;
  */
 class JUnitFormatterExtension implements ExtensionInterface
 {
-    const ENV_FILENAME = 'JARNAIZ_JUNIT_FILENAME';
-    const ENV_OUTPUTDIR = 'JARNAIZ_JUNIT_OUTPUTDIR';
-    const ENV_REALTIME = 'JARNAIZ_JUNIT_REALTIME';
+    const ENV_FILENAME = 'BEHAT_JUNIT_FILENAME';
+    const ENV_OUTPUTDIR = 'BEHAT_JUNIT_OUTPUTDIR';
 
     /**
      * process
@@ -35,7 +34,7 @@ class JUnitFormatterExtension implements ExtensionInterface
      */
     public function getConfigKey()
     {
-        return "jarnaizjunit";
+        return 'dizzy7';
     }
 
     /**
@@ -56,7 +55,6 @@ class JUnitFormatterExtension implements ExtensionInterface
     {
         $builder->children()->scalarNode('filename')->defaultValue('test_report.xml');
         $builder->children()->scalarNode('outputDir')->defaultValue('build/tests');
-        $builder->children()->booleanNode('realtime')->defaultValue(false);
     }
 
     /**
@@ -67,15 +65,8 @@ class JUnitFormatterExtension implements ExtensionInterface
      */
     public function load(ContainerBuilder $container, array $config)
     {
-        if (!$realtime = \getenv(self::ENV_REALTIME)) {
-            $realtime = $config['realtime'];
-        }
 
-        if ($realtime) {
-            $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitRealtimeFormatter');
-        } else {
-            $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitFormatter');
-        }
+        $definition = new Definition('dizzy7\\JUnitFormatter\\Formatter\\JUnitFormatter');
 
         if (!$filename = \getenv(self::ENV_FILENAME)) {
             $filename = $config['filename'];

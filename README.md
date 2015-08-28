@@ -10,7 +10,7 @@ This extension requires:
 #### Install with composer:
 
 ```bash
-$ composer require --dev jarnaiz/behat-junit-formatter
+$ composer require --dev dizzy7/behat-junit-formatter
 ```
 
 ## Basic usage
@@ -24,10 +24,9 @@ default:
     ...
 
     extensions:
-        jarnaiz\JUnitFormatter\JUnitFormatterExtension:
+        dizzy7\JUnitFormatter\JUnitFormatterExtension:
             filename: report.xml
             outputDir: %paths.base%/build/tests
-            realtime: false
     ...
 ```
 
@@ -35,13 +34,12 @@ default:
 
 * `filename` - filename (not used if realtime flag is on)
 * `outputDir` - dir to be created filename
-* `realtime` - creates a file for each feature (useful for Teamcity)
 
-you also could use JARNAIZ_JUNIT_FILENAME, JARNAIZ_JUNIT_OUTPUTDIR and JARNAIZ_JUNIT_REALTIME env variables
+you also could use BEHAT_JUNIT_FILENAME and BEHAT_JUNIT_OUTPUTDIR env variables
 
 ## Issue Submission
 
-Feel free to [Create a new issue](https://github.com/j-arnaiz/behat-junit-formatter/issues/new).
+Feel free to [Create a new issue](https://github.com/dizzy7/behat-junit-formatter/issues/new).
 
 ## Thanks to
 
