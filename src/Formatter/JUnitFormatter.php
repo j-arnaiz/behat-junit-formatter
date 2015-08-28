@@ -1,6 +1,6 @@
 <?php
 
-namespace jarnaiz\JUnitFormatter\Formatter;
+namespace dizzy7\JUnitFormatter\Formatter;
 
 use Behat\Testwork\Output\Printer\OutputPrinter;
 use Behat\Testwork\Tester\Result\TestResult;
@@ -9,7 +9,7 @@ use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Testwork\Output\Formatter;
 use Behat\Testwork\Counter\Timer;
-use jarnaiz\JUnitFormatter\Printer\FileOutputPrinter;
+use dizzy7\JUnitFormatter\Printer\FileOutputPrinter;
 
 /**
  * Class: JUnitFormatter

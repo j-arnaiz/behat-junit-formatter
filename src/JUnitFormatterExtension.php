@@ -1,6 +1,6 @@
 <?php
 
-namespace jarnaiz\JUnitFormatter;
+namespace dizzy7\JUnitFormatter;
 
 use Behat\Testwork\ServiceContainer\Extension as ExtensionInterface;
 use Behat\Testwork\ServiceContainer\ExtensionManager;

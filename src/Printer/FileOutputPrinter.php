@@ -1,6 +1,6 @@
 <?php
 
-namespace jarnaiz\JUnitFormatter\Printer;
+namespace dizzy7\JUnitFormatter\Printer;
 
 use Behat\Testwork\Output\Exception\BadOutputPathException;
 use Behat\Testwork\Output\Printer\OutputPrinter as PrinterInterface;
