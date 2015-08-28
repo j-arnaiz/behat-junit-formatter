@@ -1,6 +1,6 @@
 <?php
 
-namespace jarnaiz\JUnitFormatter;
+namespace dizzy7\JUnitFormatter;
 
 use Behat\Testwork\ServiceContainer\Extension as ExtensionInterface;
 use Behat\Testwork\ServiceContainer\ExtensionManager;
@@ -15,8 +15,8 @@ use Symfony\Component\DependencyInjection\Definition;
  */
 class JUnitFormatterExtension implements ExtensionInterface
 {
-    const ENV_FILENAME = 'JARNAIZ_JUNIT_FILENAME';
-    const ENV_OUTPUTDIR = 'JARNAIZ_JUNIT_OUTPUTDIR';
+    const ENV_FILENAME = 'BEHAT_JUNIT_FILENAME';
+    const ENV_OUTPUTDIR = 'BEHAT_JUNIT_OUTPUTDIR';
 
     /**
      * process
@@ -34,7 +34,7 @@ class JUnitFormatterExtension implements ExtensionInterface
      */
     public function getConfigKey()
     {
-        return "jarnaizjunit";
+        return 'dizzy7';
     }
 
     /**
@@ -65,17 +65,19 @@ class JUnitFormatterExtension implements ExtensionInterface
      */
     public function load(ContainerBuilder $container, array $config)
     {
-        $definition = new Definition('jarnaiz\\JUnitFormatter\\Formatter\\JUnitFormatter');
+
+        $definition = new Definition('dizzy7\\JUnitFormatter\\Formatter\\JUnitFormatter');
 
         if (!$filename = \getenv(self::ENV_FILENAME)) {
             $filename = $config['filename'];
         }
 
+        $definition->addArgument($filename);
+
         if (!$outputDir = \getenv(self::ENV_OUTPUTDIR)) {
             $outputDir = $config['outputDir'];
         }
 
-        $definition->addArgument($filename);
         $definition->addArgument($outputDir);
 
         $container->setDefinition('junit.formatter', $definition)

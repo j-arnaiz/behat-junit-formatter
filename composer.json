@@ -1,26 +1,30 @@
 {
-    "name": "jarnaiz/behat-junit-formatter",
-    "description": "Behat 3 JUnit xml formatter",
-    "authors": [
-        {
-            "name": "Jesús Arnaiz",
-            "email": "j.arnaiz@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.3.0",
-        "behat/behat": "~3.0"
+  "name": "dizzy7/behat-junit-formatter",
+  "description": "Behat 3 JUnit xml formatter",
+  "authors": [
+    {
+      "name": "Jesús Arnaiz",
+      "email": "j.arnaiz@gmail.com"
     },
-    "require-dev": {
-    },
-    "autoload": {
-        "psr-4": {
-            "jarnaiz\\JUnitFormatter\\": "src/"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "v1.0.x-dev"
-        }
+    {
+      "name": "Evgeniy Zatsepin",
+      "email": "7dizzy7@gmail.com"
     }
+  ],
+  "require": {
+    "php": ">=5.3.0",
+    "behat/behat": "~3.0"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "dizzy7\\JUnitFormatter\\": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "v1.0.x-dev"
+    }
+  }
 }
