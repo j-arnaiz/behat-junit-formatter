@@ -2,6 +2,10 @@
 
 namespace dizzy7\JUnitFormatter\Formatter;
 
+use Behat\Behat\EventDispatcher\Event\AfterScenarioTested;
+use Behat\Behat\EventDispatcher\Event\AfterStepTested;
+use Behat\Behat\EventDispatcher\Event\StepTested;
+use Behat\Behat\Tester\Result\ExecutedStepResult;
 use Behat\Testwork\Output\Printer\OutputPrinter;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Behat\EventDispatcher\Event\FeatureTested;
@@ -63,14 +67,24 @@ class JUnitFormatter implements Formatter
     protected $testcaseTimer;
 
     /**
-     * @var String
+     * @var string
      */
     protected $currentOutlineTitle;
 
     /**
-     * @var String
+     * @var string
      */
     protected $outputDir;
+
+    /**
+     * @var array|null
+     */
+    protected $lastStepFailure;
+
+    /**
+     * @var \Exception|null
+     */
+    protected $lastStepFailureException;
 
     /**
      * __construct
@@ -136,7 +150,8 @@ class JUnitFormatter implements Formatter
             FeatureTested::AFTER    => array('afterFeature', -50),
             ScenarioTested::BEFORE  => array('beforeScenario', -50),
             ScenarioTested::AFTER   => array('afterScenario', -50),
-            ExampleTested::AFTER   => array('afterScenario', -50)
+            ExampleTested::AFTER    => array('afterScenario', -50),
+            StepTested::AFTER       => array('afterStep', -50)
         );
     }
 
@@ -154,7 +169,7 @@ class JUnitFormatter implements Formatter
         $outputFile = sprintf('%s_%s.xml', $suiteId, $featureId);
 
         $this->printer = new FileOutputPrinter($outputFile, $this->outputDir);
-        $this->xml = new \SimpleXmlElement('<testsuites></testsuites>');
+        $this->xml = new \SimpleXmlElement('<?xml version="1.0" encoding="utf-8"?><testsuites></testsuites>');
 
         $testsuite = $this->xml->addChild('testsuite');
         $testsuite->addAttribute('name', $event->getSuite()->getName());
@@ -185,12 +200,7 @@ class JUnitFormatter implements Formatter
         $testsuite->addAttribute('errors', $this->testsuiteStats[TestResult::PENDING]);
         $testsuite->addAttribute('time', \round($this->testsuiteTimer->getTime(), 3));
 
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhitespace = false;
-        $dom->formatOutput = true;
-        $dom->loadXml($this->xml->asXml());
-
-        $this->printer->write($dom->saveXML());
+        $this->printer->write($this->xml->asXML());
     }
 
     /**
@@ -228,7 +238,7 @@ class JUnitFormatter implements Formatter
      *
      * @param mixed $event
      */
-    public function afterScenario($event)
+    public function afterScenario(AfterScenarioTested $event)
     {
         $this->testcaseTimer->stop();
         $code = $event->getTestResult()->getResultCode();
@@ -243,5 +253,30 @@ class JUnitFormatter implements Formatter
 
         $this->currentTestcase->addAttribute('time', \round($this->testcaseTimer->getTime(), 3));
         $this->currentTestcase->addAttribute('status', $testResultString[$code]);
+
+        if ($this->lastStepFailure) {
+            $failureNode = $this->currentTestcase->addChild('failure', $this->lastStepFailureException->getMessage());
+            $failureNode->addAttribute('message', $this->lastStepFailure);
+        }
+    }
+
+    public function afterStep(AfterStepTested $event)
+    {
+        /** @var ExecutedStepResult $result */
+        $result = $event->getTestResult();
+        if ($result->getResultCode() === TestResult::FAILED) {
+            $exception = $result->getException();
+            if ($exception) {
+                $this->lastStepFailure = sprintf(
+                    '%s:%d',
+                    $event->getFeature()->getFile(),
+                    $event->getStep()->getLine()
+                );
+                $this->lastStepFailureException = $exception;
+            }
+        } elseif ($result->getResultCode() === TestResult::PASSED) {
+            $this->lastStepFailure = null;
+            $this->lastStepFailureException = null;
+        }
     }
 }
