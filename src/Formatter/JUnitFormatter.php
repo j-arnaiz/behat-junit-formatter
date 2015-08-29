@@ -5,6 +5,7 @@ namespace jarnaiz\JUnitFormatter\Formatter;
 use Behat\Testwork\Tester\Result\TestResult;
 use Behat\Behat\EventDispatcher\Event\FeatureTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
+use Behat\Behat\EventDispatcher\Event\StepTested;
 use Behat\Behat\EventDispatcher\Event\OutlineTested;
 use Behat\Behat\EventDispatcher\Event\ExampleTested;
 use Behat\Testwork\EventDispatcher\Event\SuiteTested;
@@ -138,6 +139,7 @@ class JUnitFormatter implements Formatter
             FeatureTested::AFTER    => array('afterFeature', -50),
             ScenarioTested::BEFORE  => array('beforeScenario', -50),
             ScenarioTested::AFTER   => array('afterScenario', -50),
+            StepTested::AFTER       => array('afterStep', -50),
             OutlineTested::BEFORE   => array('beforeOutline', -50),
             ExampleTested::BEFORE  => array('beforeExample', -50),
             ExampleTested::AFTER   => array('afterScenario', -50)
@@ -163,6 +165,7 @@ class JUnitFormatter implements Formatter
 
         $testsuite = $this->xml->addChild('testsuite');
         $testsuite->addAttribute('name', $suite->getName());
+        $testsuite->addAttribute('tests', 0);
     }
 
     /**
@@ -230,6 +233,22 @@ class JUnitFormatter implements Formatter
     }
 
     /**
+     * afterStep
+     *
+     * @param mixed $event
+     */
+    public function afterStep($event)
+    {
+        $code = $event->getTestResult()->getResultCode();
+        if(TestResult::FAILED === $code) {
+            if ($event->getTestResult()->hasException()) {
+                $failureNode = $this->currentTestcase->addChild('failure', $event->getStep()->getKeyword() . " " . $event->getStep()->getText() . ":\n\n" . $event->getTestResult()->getException()->getMessage());
+                $failureNode->addAttribute('type', \get_class($event->getTestResult()->getException()));
+            }
+        }
+    }
+
+    /**
      * afterScenario
      *
      * @param mixed $event
@@ -260,7 +279,7 @@ class JUnitFormatter implements Formatter
     {
         $this->testsuiteTimer->stop();
         $testsuite = $this->currentTestsuite;
-        $testsuite->addAttribute('tests', array_sum($this->testsuiteStats));
+        $testsuite['tests'] = array_sum($this->testsuiteStats);
         $testsuite->addAttribute('failures', $this->testsuiteStats[TestResult::FAILED]);
         $testsuite->addAttribute('skipped', $this->testsuiteStats[TestResult::SKIPPED]);
         $testsuite->addAttribute('errors', $this->testsuiteStats[TestResult::PENDING]);
