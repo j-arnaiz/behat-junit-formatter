@@ -2,7 +2,7 @@
 
 namespace jarnaiz\JUnitFormatter\Formatter;
 
-use Behat\Testwork\Tester\Result\TestResult;
+use Behat\Behat\Tester\Result\StepResult as TestResult;
 use Behat\Behat\EventDispatcher\Event\FeatureTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Behat\EventDispatcher\Event\StepTested;
@@ -185,6 +185,7 @@ class JUnitFormatter implements Formatter
             TestResult::SKIPPED   => 0,
             TestResult::PENDING   => 0,
             TestResult::FAILED    => 0,
+            TestResult::UNDEFINED => 0,
         );
 
         $this->testsuiteTimer->start();
@@ -262,6 +263,7 @@ class JUnitFormatter implements Formatter
             TestResult::SKIPPED   => 'skipped',
             TestResult::PENDING   => 'pending',
             TestResult::FAILED    => 'failed',
+            TestResult::UNDEFINED => 'undefined',
         );
 
         $this->testsuiteStats[$code]++;
