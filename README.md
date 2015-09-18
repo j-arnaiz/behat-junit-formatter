@@ -30,6 +30,10 @@ default:
     ...
 ```
 
+Be sure to call behat with the formatter:
+
+behat -f junit
+
 ## Configuration
 
 * `filename` - filename
