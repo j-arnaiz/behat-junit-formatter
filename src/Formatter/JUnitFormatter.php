@@ -243,7 +243,7 @@ class JUnitFormatter implements Formatter
         $code = $event->getTestResult()->getResultCode();
         if(TestResult::FAILED === $code) {
             if ($event->getTestResult()->hasException()) {
-                $failureNode = $this->currentTestcase->addChild('failure', $event->getStep()->getKeyword() . " " . $event->getStep()->getText() . ":\n\n" . $event->getTestResult()->getException()->getMessage());
+                $failureNode = $this->currentTestcase->addChild('failure', $event->getStep()->getKeyword() . " " . htmlentities($event->getStep()->getText()) . ":\n\n" . htmlentities($event->getTestResult()->getException()->getMessage()));
                 $failureNode->addAttribute('type', \get_class($event->getTestResult()->getException()));
             }
         }
