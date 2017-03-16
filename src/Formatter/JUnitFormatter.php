@@ -71,16 +71,23 @@ class JUnitFormatter implements Formatter
     private $currentOutlineTitle;
 
     /**
+     * @var string
+     */
+    private $basepath;
+
+    /**
      * __construct
      *
-     * @param mixed $filename
-     * @param mixed $outputDir
+     * @param mixed  $filename
+     * @param mixed  $outputDir
+     * @param string $basepath
      */
-    public function __construct($filename, $outputDir)
+    public function __construct($filename, $outputDir, $basepath)
     {
         $this->printer        = new FileOutputPrinter($filename, $outputDir);
         $this->testsuiteTimer = new Timer();
         $this->testcaseTimer  = new Timer();
+        $this->basepath       = $basepath;
     }
 
     /**
@@ -179,6 +186,12 @@ class JUnitFormatter implements Formatter
 
         $this->currentTestsuite = $testsuite = $this->xml->addChild('testsuite');
         $testsuite->addAttribute('name', $feature->getTitle());
+        if ($feature->getFile() !== null) {
+            $testsuite->addAttribute(
+                'file',
+                str_replace($this->basepath . DIRECTORY_SEPARATOR, '', $feature->getFile())
+            );
+        }
 
         $this->testsuiteStats =  array(
             TestResult::PASSED    => 0,

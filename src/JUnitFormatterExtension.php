@@ -77,6 +77,7 @@ class JUnitFormatterExtension implements ExtensionInterface
 
         $definition->addArgument($filename);
         $definition->addArgument($outputDir);
+        $definition->addArgument($container->getParameter('paths.base'));
 
         $container->setDefinition('junit.formatter', $definition)
             ->addTag('output.formatter');
