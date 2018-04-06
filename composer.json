@@ -1,6 +1,7 @@
 {
     "name": "jarnaiz/behat-junit-formatter",
     "description": "Behat 3 JUnit xml formatter",
+    "license": "GPL-2.0-only",
     "authors": [
         {
             "name": "Jesús Arnaiz",
