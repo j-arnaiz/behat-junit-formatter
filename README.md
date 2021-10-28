@@ -17,7 +17,7 @@ $ composer require --dev jarnaiz/behat-junit-formatter
 
 Activate the extension by specifying its class in your `behat.yml`:
 
-```json
+```yaml
 # behat.yml
 default:
     suites:
@@ -26,7 +26,7 @@ default:
     extensions:
         jarnaiz\JUnitFormatter\JUnitFormatterExtension:
             filename: report.xml
-            outputDir: %paths.base%/build/tests
+            outputDir: '%paths.base%/build/tests'
     ...
 ```
 
